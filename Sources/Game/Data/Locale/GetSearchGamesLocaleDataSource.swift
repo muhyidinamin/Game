@@ -11,7 +11,7 @@ import Combine
 import RealmSwift
 import Foundation
 
-public struct GetGamesLocaleDataSource: LocaleDataSource {
+public struct GetSearchGamesLocaleDataSource: LocaleDataSource {
   public typealias Request = String
   public typealias Response = GameEntity
 
@@ -25,12 +25,8 @@ public struct GetGamesLocaleDataSource: LocaleDataSource {
     return Future<[GameEntity], Error> { completion in
       guard let request = request else { return completion(.failure(DatabaseError.requestFailed)) }
 
-      let genre: Results<GenreEntity> = {
-        self._realm.objects(GenreEntity.self).filter("id = \(request)")
-      }()
-      
       let games: Results<GameEntity> = {
-        self._realm.objects(GameEntity.self).filter("ANY genres IN %@", genre)
+        self._realm.objects(GameEntity.self).filter("title contains[c] %@", request)
         .sorted(byKeyPath: "title", ascending: true)
       }()
       
@@ -44,7 +40,16 @@ public struct GetGamesLocaleDataSource: LocaleDataSource {
           do {
             try self._realm.write {
                   for game in entities {
-                    self._realm.add(game, update: .all)
+                    if let gameEntity = self._realm.object(ofType: GameEntity.self, forPrimaryKey: game.id) {
+                      if gameEntity.id == game.id {
+                        game.favorite = gameEntity.favorite
+                        self._realm.add(game, update: .all)
+                      } else {
+                        self._realm.add(game, update: .all)
+                      }
+                    } else {
+                      self._realm.add(game, update: .all)
+                    }
                   }
                   completion(.success(true))
               }
@@ -61,6 +66,7 @@ public struct GetGamesLocaleDataSource: LocaleDataSource {
         self._realm.objects(GameEntity.self)
           .filter("id = \(id)")
       }()
+      
       guard let game = games.first else {
         completion(.failure(DatabaseError.requestFailed))
         return

@@ -27,7 +27,6 @@ where
     }
     
   public func transformResponseToEntity(request: String?, response: [GameResponse]) -> [GameEntity] {
-    print("games step")
         return response.map { result in
           _gameMapper.transformResponseToEntity(request: request, response: result)
         }

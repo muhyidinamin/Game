@@ -29,8 +29,6 @@ GenreMapper.Domain == [GenreModel] {
   }
     
   public func transformResponseToEntity(request: String?, response: GameResponse) -> GameEntity {
-    print(response)
-    
     let genres = _genreMapper.mapGanreResponsesToListEntities(input: response.genres ?? [])
     let alternativeNames = mapGameResponseToListName(input: response.alternativeNames ?? [])
     let platforms = mapGameResponseToListPlatform(input: response.platforms ?? [])
@@ -53,9 +51,7 @@ GenreMapper.Domain == [GenreModel] {
     gameEntity.parentPlatforms = parentPlatforms
     gameEntity.developers = developers
     gameEntity.publishers = publishers
-    print(gameEntity)
     return gameEntity
-    
   }
     
   public func transformEntityToDomain(entity: GameEntity) -> GameModel {

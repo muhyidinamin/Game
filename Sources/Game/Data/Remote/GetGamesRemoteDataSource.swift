@@ -27,17 +27,15 @@ public struct GetGamesRemoteDataSource : DataSource {
         return Future<[GameResponse], Error> { completion in
             
           guard let request = request else { return completion(.failure(URLError.invalidRequest)) }
-          print(self._endpoint + request)
-          if let url = URL(string: self._endpoint + request) {
+          let req = request.replacingOccurrences(of: " ", with: "%20")
+          if let url = URL(string: self._endpoint + req) {
                 AF.request(url)
                     .validate()
                     .responseDecodable(of: GamesResponse.self) { response in
                         switch response.result {
                         case .success(let value):
-                          print("success remote")
                             completion(.success(value.results))
                         case .failure:
-                          print("gagal remote")
                             completion(.failure(URLError.invalidResponse))
                         }
                     }

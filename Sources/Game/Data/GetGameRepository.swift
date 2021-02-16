@@ -45,7 +45,7 @@ where
         
         return _localeDataSource.get(id: Int(request) ?? 0)
           .flatMap { result -> AnyPublisher<GameModel, Error> in
-            if result.desc == "Unknow" {
+            if result.desc == "Unknow" || result.desc == "" {
               return self._remoteDataSource.execute(request: request)
                 .map { self._mapper.transformResponseToEntity(request: request, response: $0) }
                 .catch { _ in self._localeDataSource.get(id: Int(request) ?? 0) }
@@ -54,6 +54,14 @@ where
                 .flatMap { _ in self._localeDataSource.get(id: Int(request) ?? 0)
                   .map { self._mapper.transformEntityToDomain(entity: $0) }
                 }.eraseToAnyPublisher()
+//              .map { GameMapper.mapDetailGameResponseToEntity(by: idGame, input: $0) }
+//              .catch { _ in self.locale.getGame(by: idGame) }
+//              .flatMap { self.locale.updateGame(by: idGame, game: $0) }
+//              .filter { $0 }
+//              .flatMap { _ in self.locale.getGame(by: idGame)
+//                .map { GameMapper.mapDetailGameEntityToDomain(input: $0) }
+//              }.eraseToAnyPublisher()
+
             } else {
               return self._localeDataSource.get(id: Int(request) ?? 0)
                 .map { self._mapper.transformEntityToDomain(entity: $0) }
